@@ -1,18 +1,12 @@
-from os import environ
-from flask import Flask
 from celery import Celery
+from flask import Flask
 
 app: Flask = Flask(__name__)
-
-# Configs
-REDIS_HOST = '0.0.0.0'
-REDIS_PORT = 6379
-BROKER_URL = environ.get('REDIS_URL', 'redis://$REDIS_HOST:$REDIS_PORT/0')
-CELERY_RESULT_BACKEND = BROKER_URL
+app.config.from_object('config')
 
 
 def make_celery(app: Flask):
-    celery = Celery(app.import_name, broker=BROKER_URL)
+    celery = Celery(app.import_name, broker=app.config['BROKER_URL'])
     TaskBase = celery.Task
 
     class ContextTask(TaskBase):
