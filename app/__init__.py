@@ -1,12 +1,16 @@
 from celery import Celery
 from flask import Flask
 
+import celeryconfig
+
 app: Flask = Flask(__name__)
 app.config.from_object('config')
 
 
 def make_celery(app: Flask):
     celery = Celery(app.import_name, broker=app.config['BROKER_URL'])
+    celery.conf.update(app.config)
+    celery.config_from_object(celeryconfig)
     TaskBase = celery.Task
 
     class ContextTask(TaskBase):
